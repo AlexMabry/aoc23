@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "aoc23"
+version = "12.25.23"
+description = "Advent of Code 2023"
+authors = ["Alex Mabry"]
+readme = "README.md"
+packages = [
+    { include = "aoc23" }
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jinja2 = "^3.1.2"
+advent-of-code-data = "^2.0.1"
+browser-cookie3 = "^0.19.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+generate = "aoc23.main:generate"
+test = "aoc23.main:test"
+solve = "aoc23.main:solve"
+
