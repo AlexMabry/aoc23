@@ -1,0 +1,21 @@
+name: Update AoC Badges
+on:
+  schedule:                                      # run workflow based on schedule
+    - cron: '9 5 1-25 12 *'                      # from the 1. December till 25. December every day at 5:09am (avoid load at full hours)
+      
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2                # clones your repo
+          
+      - uses: joblo2213/aoc-badges-action@v3
+        with:
+          userid: 268617                         # your user id, see setup on how to obtain
+          session: ${{ secrets.AOC_SESSION }}    # secret containing session code, see setup on how to obtain
+          year: 2023                             # The year for which stats should be retrieved
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update badges
+          file_pattern: README.md
