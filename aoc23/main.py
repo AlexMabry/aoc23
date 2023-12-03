@@ -50,18 +50,18 @@ def test_day(day):
         print(f"Example {i}:")
 
         if not puzzle.answered_a:
+            answer = day_module.solve_part1(example.input_data)
+            print(f"  Part 1: {answer}")
             if not example.answer_a:
-                answer = day_module.solve_part1(example.input_data)
-                print(f"  Part 1: {answer}")
                 print(f"  Answer: {example.answer_a}")
                 assert str(answer) == example.answer_a, "Part 1 answer does not match"
             else:
                 print(f"  Missing part 1 answer")
 
         elif not puzzle.answered_b:
+            answer = day_module.solve_part2(example.input_data)
+            print(f"  Part 2: {answer}")
             if not example.answer_b:
-                answer = day_module.solve_part2(example.input_data)
-                print(f"  Part 2: {answer}")
                 print(f"  Answer: {example.answer_b}")
                 assert str(answer) == example.answer_b, "Part 2 answer does not match"
             else:
