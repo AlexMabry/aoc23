@@ -1,3 +1,4 @@
+import math
 import re
 
 from ..utils import parse_data
@@ -15,6 +16,10 @@ def solve_part1(data: str):
 
 def solve_part2(data: str):
     input_data = parse_data(data)
-    print(input_data)
+    time, dist = [int("".join(d for d in line if d.isdigit())) for line in input_data]
 
-    return None
+    tick = 1
+    while not tick * (time - tick) > dist:
+        tick += 1
+
+    return time - 2 * tick + 1
