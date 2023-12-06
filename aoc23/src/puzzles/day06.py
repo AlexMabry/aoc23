@@ -1,4 +1,3 @@
-import math
 import re
 
 from ..utils import parse_data
