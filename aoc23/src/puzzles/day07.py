@@ -64,12 +64,4 @@ def solve_part1(data: str):
 
 
 def solve_part2(data: str):
-    input_data = parse_data(data)
-    hands = sorted(
-        [
-            Hand(["*" if c == "J" else c for c in self.cards], int(bid))
-            for cards, bid in [line.split(" ") for line in input_data]
-        ]
-    )
-
-    return sum(hand.bid * (rank + 1) for rank, hand in enumerate(hands))
+    return solve_part1(data.replace('J', '*'))
