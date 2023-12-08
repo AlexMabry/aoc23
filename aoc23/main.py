@@ -39,8 +39,14 @@ def solve_day(day):
         puzzle.answer_b = answer_b
 
     else:
-        print(f"  Part 1: {puzzle.answer_a}")
-        print(f"  Part 2: {puzzle.answer_b}")
+        print("Already answered!")
+        print(f"Part 1")
+        print(f"  submitted: {puzzle.answer_a}")
+        print(f"  rerunning: {day_module.solve_part1(puzzle.input_data)}")
+        print("")
+        print(f"Part 2")
+        print(f"  submitted: {puzzle.answer_b}")
+        print(f"  rerunning: {day_module.solve_part2(puzzle.input_data)}")
 
 
 def test_day(day):

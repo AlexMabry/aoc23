@@ -1,85 +1,52 @@
 import re
-from itertools import cycle, tee
+from itertools import cycle
+from math import gcd
 
 from ..utils import parse_data
 
 
-class Node:
-    name: str
-    end: bool = False
-    left: "Node"
-    right: "Node"
-
-    def __init__(self, name: str):
-        self.name = name
-        self.end = name.endswith("Z")
-
-    def __repr__(self):
-        return f"Node({self.name}) {self.left.name} <-> {self.right.name}"
-
-    def __nonzero__(self):
-        return self.end
-
-    def set_neighbours(self, left: "Node", right: "Node"):
-        self.left = left
-        self.right = right
-
-
-def get_nodes(input_data):
+def get_left_right(data):
+    input_data = parse_data(data)
+    directions = [c == "L" for c in input_data[0]]
     connections = [
         match.groups()
         for line in input_data[2:]
         for match in re.finditer(r"(.+) = \((.+), (.+)\)", line)
     ]
-
-    nodes = {name: Node(name) for (name, _, _) in connections}
-    for name, left, right in connections:
-        nodes[name].set_neighbours(nodes[left], nodes[right])
-
-    return nodes
+    left = {name: L for name, L, _ in connections}
+    right = {name: R for name, _, R in connections}
+    return directions, left, right
 
 
 def solve_part1(data: str):
-    input_data = parse_data(data)
-    directions = [c for c in input_data[0]]
-    nodes = get_nodes(input_data)
+    directions, left, right = get_left_right(data)
 
-    current_node = nodes["AAA"]
-    steps = 0
-    for direction in cycle(directions):
+    path, steps = "AAA", 0
+    for go_left in cycle(directions):
         steps += 1
-        if direction == "L":
-            current_node = current_node.left
-        else:
-            current_node = current_node.right
+        path = left[path] if go_left else right[path]
 
-        if current_node.name == "ZZZ":
+        if path == "ZZZ":
             return steps
 
 
 def solve_part2(data: str):
-    input_data = parse_data(data)
-    directions = [c for c in input_data[0]]
-    nodes = get_nodes(input_data)
-    print(len(nodes))
-    ghosts = [node for name, node in nodes.items() if name.endswith("A")]
-    patterns = {}
+    directions, left, right = get_left_right(data)
+    starters = [name for name in left.keys() if name.endswith("A")]
+    endings = set(name for name in left.keys() if name.endswith("Z"))
 
-    steps = 0
-    for direction in cycle(directions):
-        steps += 1
-        before = direction, tuple(ghost.name for ghost in ghosts)
+    durations = {}
+    for g in starters:
+        path, steps = g, 0
+        for go_left in cycle(directions):
+            steps += 1
+            path = left[path] if go_left else right[path]
+            if path in endings:
+                durations[g] = steps
+                break
 
-        if before in patterns:
-            ghosts = patterns[before]
-            print("found pattern", ghosts)
-        else:
-            if direction == "L":
-                ghosts = [ghost.left for ghost in ghosts]
-            else:
-                ghosts = [ghost.right for ghost in ghosts]
+    lcm = 1
+    for val in durations.values():
+        lcm = lcm * val // gcd(lcm, val)
 
-            if all(g.end for g in ghosts):
-                return steps
-            else:
-                patterns[before] = ghosts
+    return lcm
