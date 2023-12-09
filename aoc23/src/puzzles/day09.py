@@ -5,10 +5,9 @@ from ..utils import parse_data
 
 
 def get_ranges(data):
-    input_data = parse_data(data)
     return [
         [int(g) for match in finditer(r"([\d-]+)", line) for g in match.groups()]
-        for line in input_data
+        for line in parse_data(data)
     ]
 
 
