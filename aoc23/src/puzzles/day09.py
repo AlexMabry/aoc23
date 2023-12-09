@@ -1,15 +1,30 @@
+from itertools import pairwise
+from re import finditer
+
 from ..utils import parse_data
 
 
-def solve_part1(data: str):
+def get_ranges(data):
     input_data = parse_data(data)
-    print(input_data)
+    return [
+        [int(g) for match in finditer(r"([\d-]+)", line) for g in match.groups()]
+        for line in input_data
+    ]
 
-    return None
+
+def decompose(rng):
+    answer = 0
+    while set(rng) != {0}:
+        answer += rng[-1]
+        rng = [b - a for a, b in pairwise(rng)]
+    return answer
+
+
+def solve_part1(data: str):
+    ranges = get_ranges(data)
+    return sum(decompose(rng) for rng in ranges)
 
 
 def solve_part2(data: str):
-    input_data = parse_data(data)
-    print(input_data)
-
-    return None
+    reversed_ranges = [list(reversed(rng)) for rng in get_ranges(data)]
+    return sum(decompose(rng) for rng in reversed_ranges)
