@@ -9,43 +9,26 @@ def solve_part1(data: str):
     return sum(numbers)
 
 
-WORDS = {
-    "one": "1",
-    "two": "2",
-    "three": "3",
-    "four": "4",
-    "five": "5",
-    "six": "6",
-    "seven": "7",
-    "eight": "8",
-    "nine": "9",
-}
+WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+
+def replace_number_words(input_data, *, direction="left"):
+    words = [
+        sorted(
+            (loc, word, str(num))
+            for num, word in enumerate(WORDS)
+            if (loc := row.find(word) if direction == "left" else row.rfind(word)) != -1
+        )
+        for row in input_data
+    ]
+    words = [(w[0][1], w[0][2]) if w else ("", "") for w in words]
+    return [row.replace(word, num) for (word, num), row in zip(words, input_data)]
 
 
 def solve_part2(data: str):
     input_data = parse_data(data)
-
-    left = [
-        sorted(
-            (loc, word, num)
-            for word, num in WORDS.items()
-            if (loc := row.find(word)) != -1
-        )
-        for row in input_data
-    ]
-    left = [(lwords[0][1], lwords[0][2]) if lwords else ("", "") for lwords in left]
-    input_data = [row.replace(word, num) for (word, num), row in zip(left, input_data)]
-
-    right = [
-        sorted(
-            (loc, word, num)
-            for word, num in WORDS.items()
-            if (loc := row.rfind(word)) != -1
-        )
-        for row in input_data
-    ]
-    right = [(rwords[0][1], rwords[0][2]) if rwords else ("", "") for rwords in right]
-    input_data = [row.replace(word, num) for (word, num), row in zip(right, input_data)]
+    input_data = replace_number_words(input_data, direction="left")
+    input_data = replace_number_words(input_data, direction="right")
 
     digits = [[d for d in row if d.isdigit()] for row in input_data]
     numbers = [int(d[0] + d[-1]) for d in digits]
