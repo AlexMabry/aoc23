@@ -57,12 +57,12 @@ def solve_part2(data: str):
     expanded = {Point(x, y) for y in range(H) for x in range(W)}
 
     # remove the path and the turns
-    exp_path = set().union(
-        np
+    expanded_path = set().union(
+        step
         for point, facing in zip(path, turns)
-        for np in (point * 2, (point * 2).neighbor(facing))
+        for step in (point * 2, (point * 2).neighbor(facing))
     )
-    expanded -= exp_path
+    expanded -= expanded_path
 
     # remove the outside until there is no more outside
     outside = {p for p in expanded if p.x in [0, W - 1] or p.y in [0, H - 1]}
