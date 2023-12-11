@@ -2,13 +2,14 @@ import re
 
 from ..utils import parse_data
 
-CARD = r"Card\s+\d+: ([\d\s]+)\s+\|\s+([\d\s]+)"
-
 
 def get_winning_numbers(data):
     input_data = parse_data(data)
-    cards = [match.groups() for row in input_data for match in re.finditer(CARD, row)]
-    numbers = [[{int(n) for n in side.split()} for side in sides] for sides in cards]
+    numbers = [
+        [{int(n) for n in side.split()} for side in match.groups()]
+        for row in input_data
+        for match in re.finditer(r"Card\s+\d+: ([\d\s]+)\s+\|\s+([\d\s]+)", row)
+    ]
     return [len(winner & player) for [winner, player] in numbers]
 
 

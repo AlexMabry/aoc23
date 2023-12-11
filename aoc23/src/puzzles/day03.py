@@ -19,7 +19,7 @@ def solve_part1(data: str):
         int(match[0])
         for y, row in enumerate(input_data)
         for match in re.finditer(r"\d+", row)
-        if overlapped(covered, match, y)
+        if covered & {(x, y) for x in range(match.start(), match.end())}
     )
 
     return total
@@ -42,14 +42,10 @@ def solve_part2(data: str):
             int(match[0])
             for yy in range(max(0, y - 1), min(len(input_data), y + 2))
             for match in re.finditer(r"\d+", input_data[yy])
-            if overlapped(covered, match, y)
+            if covered & {(x, y) for x in range(match.start(), match.end())}
         ]
 
         if len(nums) == 2:
             total += nums[0] * nums[1]
 
     return total
-
-
-def overlapped(covered, match, y):
-    return covered & {(x, y) for x in range(match.start(), match.end())}
