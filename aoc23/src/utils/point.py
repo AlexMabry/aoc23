@@ -12,6 +12,10 @@ class Point:
     def __sub__(self, other):
         return Point(self.x - other.x, self.y - other.y)
 
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Point(self.x * other, self.y * other)
+
     def __eq__(self, other):
         return (self.x, self.y) == (other.x, other.y)
 
@@ -50,3 +54,15 @@ class Point:
             return self.east()
         elif direction == "W":
             return self.west()
+
+    def all_neighbors(self):
+        return {
+            Point(self.x, self.y - 1),
+            Point(self.x, self.y + 1),
+            Point(self.x - 1, self.y),
+            Point(self.x + 1, self.y),
+            Point(self.x - 1, self.y - 1),
+            Point(self.x + 1, self.y - 1),
+            Point(self.x - 1, self.y + 1),
+            Point(self.x + 1, self.y + 1),
+        }
