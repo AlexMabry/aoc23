@@ -58,11 +58,9 @@ def solve_part2(data: str):
 
     # remove the path and the turns
     exp_path = set().union(
-        {
-            np
-            for point, facing in zip(path, turns)
-            for np in (point * 2, (point * 2).neighbor(facing))
-        }
+        np
+        for point, facing in zip(path, turns)
+        for np in (point * 2, (point * 2).neighbor(facing))
     )
     expanded -= exp_path
 
