@@ -9,14 +9,14 @@ def solve(data, extra):
     H, W = len(univ), len(univ[0])
 
     empty_cols = {i for i in range(W) if {univ[j][i] for j in range(H)} == {"."}}
-    empty_rows = {i for i in range(H) if all(univ[i][j] == "." for j in range(W))}
+    empty_rows = {i for i in range(H) if {univ[j][i] for j in range(W)} == {"."}}
     coords = [(i, j) for i in range(H) for j in range(W) if univ[i][j] == "#"]
 
     distance = 0
-    for a, b in combinations(coords, 2):
-        x_extra = len(set(range(min(a[0], b[0]), max(a[0], b[0]) + 1)) & empty_rows)
-        y_extra = len(set(range(min(a[1], b[1]), max(a[1], b[1]) + 1)) & empty_cols)
-        distance += abs(a[0] - b[0]) + abs(a[1] - b[1]) + (x_extra + y_extra) * extra
+    for (ax, ay), (bx, by) in combinations(coords, 2):
+        x_extra = len(set(range(min(ax, bx), max(ax, bx) + 1)) & empty_rows)
+        y_extra = len(set(range(min(ay, by), max(ay, by) + 1)) & empty_cols)
+        distance += abs(ax - bx) + abs(ay - by) + (x_extra + y_extra) * extra
 
     return distance
 
