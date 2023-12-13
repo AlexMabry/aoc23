@@ -3,38 +3,43 @@ from itertools import pairwise
 from ..utils import parse_data
 
 
-def find_fold(chars: [str]):
-    return next(
-        (
-            p + 1
-            for p, (i, j) in enumerate(pairwise(chars))
-            if i == j
-            and all(
-                chars[p - i] == chars[p + i + 1]
-                for i in range(p + 1)
-                if len(chars) - i - 1 > p >= i
-            )
-        ),
-        0,
+def is_valid(puzzle, fold):
+    return all(
+        puzzle[fold - i] == puzzle[fold + i + 1]
+        for i in range(1, fold + 1)
+        if len(puzzle) - i - 1 > fold >= i
     )
 
 
-def solve_part1(data: str):
-    by_row = []
+def find_folds(puzzle):
+    return (fold for fold, (i, j) in enumerate(pairwise(puzzle)) if i == j)
 
-    input_data = parse_data(data)
+
+def valid_folds(puzzles):
+    return (f + 1 for p in puzzles for f in find_folds(p) if is_valid(p, f))
+
+
+def transpose(p):
+    return ["".join(row[i] for row in p) for i in range(len(p[0]))]
+
+
+def get_puzzles(input_data):
+    puzzles = []
     while input_data:
-        by_row.append([])
+        puzzles.append([])
         while input_data and (row := input_data.pop(0)):
-            by_row[-1].append(row)
+            puzzles[-1].append(row)
 
-    by_col = [["".join(row[i] for row in p) for i in range(len(p[0]))] for p in by_row]
+    return puzzles
 
-    return sum(find_fold(r) * 100 + find_fold(c) for r, c in zip(by_row, by_col))
+
+def solve_part1(data: str):
+    input_data = parse_data(data)
+    puzzles = get_puzzles(input_data)
+    transposed = (transpose(puz) for puz in puzzles)
+
+    return sum(valid_folds(puzzles)) * 100 + sum(valid_folds(transposed))
 
 
 def solve_part2(data: str):
-    input_data = parse_data(data)
-    print(input_data)
-
     return None
