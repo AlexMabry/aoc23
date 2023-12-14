@@ -51,6 +51,19 @@ def window(seq, n=2):
         yield result
 
 
+def find_required(pattern):
+    required, found, iter = set(), None, 0
+    while iter < len(pattern):
+        if pattern[iter] == "#":
+            found = (found[0] if found else iter, iter + 1)
+        elif found:
+            required.add(found)
+            found = None
+        iter += 1
+
+    return required
+
+
 def find_positions(pattern, groups):
     positions = {ig: set() for ig in range(len(groups))}
     for ig, g in enumerate(groups):
@@ -69,20 +82,43 @@ def find_positions(pattern, groups):
     return positions
 
 
+def in_bounds(hashes: tuple, ranges):
+    return any(hashes[0] >= r[0] and hashes[1] <= r[1] for r in ranges)
+
+
 def times_five(pattern, groups):
     return "?".join([pattern] * 5), [int(n) for n in ",".join([groups] * 5).split(",")]
 
 
+def required_in_positions(required, positions):
+    return {
+        hashes: {ig for ig, ranges in positions.items() if in_bounds(hashes, ranges)}
+        for hashes in required
+    }
+
+
 def solve_part2(data: str):
-    input_data = parse_data(TEST_DATA, regex=r"([\.\?#]+) ([\d,]+)")
+    input_data = parse_data(data, regex=r"([\.\?#]+) ([\d,]+)")
     answer = 0
-    for pattern, groups in input_data[-1:]:
+    for pattern, groups in input_data:
         pattern, groups = times_five(pattern, groups)
         positions = find_positions(pattern, groups)
+        required = find_required(pattern)
+
         before = tuple(len(p) for p in positions.values())
         after = 0
         while after != before:
             before = after
+
+            for hashes, matches in required_in_positions(required, positions).items():
+                if len(matches) == 1:
+                    ig = matches.pop()
+                    positions[ig] = {
+                        p
+                        for p in positions[ig]
+                        if hashes[0] >= p[0] and hashes[1] <= p[1]
+                    }
+
             for ig in range(1, len(positions)):
                 smallest = min(r[0] for r in positions[ig - 1])
                 positions[ig] = {p for p in positions[ig] if p[0] > smallest}
@@ -101,19 +137,16 @@ def solve_part2(data: str):
 
             after = tuple(len(p) for p in positions.values())
 
-        print(pattern)
-        for ig, pos in positions.items():
-            for p in pos:
-                print(ig, p, pattern[p[0] : p[1]])
-        print(reduce(lambda x, y: x * y, (len(p) for p in positions.values())))
+        value = [{p: 0 for p in positions[ig]} for ig in range(len(positions) - 1)]
+        value.append({p: 1 for p in positions[len(positions) - 1]})
+
+        for ig in range(len(positions) - 2, -1, -1):
+            for p1 in positions[ig]:
+                value[ig][p1] = sum(
+                    value[ig + 1][p2] for p2 in positions[ig + 1] if p2[0] > p1[1]
+                )
+
+        answer += sum(value[0].values())
 
     print(answer)
     return None
-
-
-TEST_DATA = """???.### 1,1,3
-.??..??...?##. 1,1,3
-?#?#?#?#?#?#?#? 1,3,1,6
-????.#...#... 4,1,1
-????.######..#####. 1,6,5
-?###???????? 3,2,1"""
