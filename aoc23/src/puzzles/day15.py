@@ -1,4 +1,4 @@
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from functools import reduce
 from itertools import chain
 
@@ -6,7 +6,7 @@ from ..utils import parse_data
 
 
 def hash_val(string):
-    ords = chain([0], (ord(c) for c in string))
+    ords = chain(range(1), (ord(c) for c in string))
     return reduce(lambda a, b: (a + b) * 17 % 256, ords)
 
 
@@ -20,16 +20,16 @@ def solve_part2(data: str):
     steps = "".join(input_data).replace("-", "=").split(",")
     commands = ([c for c in s.split("=") if c] for s in steps)
 
-    boxes = defaultdict(OrderedDict)
+    boxes = defaultdict(dict)
     for cmd in commands:
-        label = hash_val(cmd[0])
+        label = hash_val(cmd[0]) + 1
         if len(cmd) == 2:
             boxes[label][cmd[0]] = int(cmd[1])
         elif cmd[0] in boxes[label]:
             del boxes[label][cmd[0]]
 
     return sum(
-        (ib + 1) * (il + 1) * focal
+        ib * il * focal
         for ib, box in boxes.items()
-        for il, focal in enumerate(box.values())
+        for il, focal in enumerate(box.values(), start=1)
     )
