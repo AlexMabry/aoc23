@@ -29,7 +29,7 @@ def solve_part2(data: str):
             del boxes[label][cmd[0]]
 
     return sum(
-        ib * il * focal
-        for ib, box in boxes.items()
-        for il, focal in enumerate(box.values(), start=1)
+        box_num * position * focal
+        for box_num, box in boxes.items()
+        for position, focal in enumerate(box.values(), start=1)
     )
