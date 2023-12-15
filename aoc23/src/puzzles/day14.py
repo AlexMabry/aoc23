@@ -36,16 +36,16 @@ def diff(before, after):
 def solve_part1(data: str):
     input_data = parse_data(data)
     rocks = [[c for c in row] for row in input_data]
-    rocks = tilt(rocks)
-    return weigh(rocks)
+
+    return weigh(tilt(rocks))
 
 
 def solve_part2(data: str):
     input_data = parse_data(data)
     rocks = [[c for c in row] for row in input_data]
 
-    remaining = 1_000_000_001
     pattern = []
+    remaining = 1_000_000_000
     while (remaining := remaining - 1) > 0:
         before = rocks.copy()
         for _ in range(4):
@@ -57,6 +57,6 @@ def solve_part2(data: str):
             elif (changed := diff(before, rocks)) != pattern[0]:
                 pattern.append(changed)
             else:
-                remaining = remaining % len(pattern)
+                remaining = remaining % len(pattern) + 1
 
     return weigh(rocks)
