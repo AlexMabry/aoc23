@@ -8,32 +8,32 @@ def tilt(rocks):
     while before != rocks:
         before = rocks.copy()
         for a, b in pairwise(range(len(rocks))):
-            rocks[a] = [
+            rocks[a] = "".join(
                 "*" if (ca, cb) == (".", "O") else ca
                 for ca, cb in zip(rocks[a], rocks[b])
-            ]
-            rocks[b] = ["." if ca == "*" else cb for ca, cb in zip(rocks[a], rocks[b])]
-            rocks[a] = ["O" if ca == "*" else ca for ca in rocks[a]]
+            )
+            rocks[b] = "".join(
+                "." if ca == "*" else cb for ca, cb in zip(rocks[a], rocks[b])
+            )
+            rocks[a] = "".join("O" if ca == "*" else ca for ca in rocks[a])
     return rocks
 
 
 def weigh(rocks):
     return sum(
-        (len(rocks) - i) * sum([1 for c in row if c == "O"])
+        (len(rocks) - i) * sum(1 for c in row if c == "O")
         for i, row in enumerate(rocks)
     )
 
 
 def solve_part1(data: str):
-    input_data = parse_data(data)
-    rocks = [[c for c in row] for row in input_data]
+    rocks = parse_data(data)
 
     return weigh(tilt(rocks))
 
 
 def solve_part2(data: str):
-    input_data = parse_data(data)
-    rocks = [[c for c in row] for row in input_data]
+    rocks = parse_data(data)
 
     pattern = []
     remaining = 1_000_000_000
@@ -43,8 +43,8 @@ def solve_part2(data: str):
 
         if 10_000 < remaining <= 999_999_900:
             if not pattern:
-                pattern = [hash(tuple(str(row) for row in rocks))]
-            elif (changed := hash(tuple(str(row) for row in rocks))) != pattern[0]:
+                pattern = [hash(tuple(rocks))]
+            elif (changed := hash(tuple(rocks))) != pattern[0]:
                 pattern.append(changed)
             else:
                 remaining = remaining % len(pattern) + 1
