@@ -24,15 +24,6 @@ def weigh(rocks):
     )
 
 
-def diff(before, after):
-    return tuple(
-        (x, y)
-        for y, (a, b) in enumerate(zip(before, after))
-        for x, (ca, cb) in enumerate(zip(a, b))
-        if ca != cb
-    )
-
-
 def solve_part1(data: str):
     input_data = parse_data(data)
     rocks = [[c for c in row] for row in input_data]
@@ -46,15 +37,14 @@ def solve_part2(data: str):
 
     pattern = []
     remaining = 1_000_000_000
-    while (remaining := remaining - 1) > 0:
-        before = rocks.copy()
+    while remaining := remaining - 1:
         for _ in range(4):
             rocks = list(zip(*reversed(tilt(rocks))))
 
         if 10_000 < remaining <= 999_999_900:
             if not pattern:
-                pattern = [diff(before, rocks)]
-            elif (changed := diff(before, rocks)) != pattern[0]:
+                pattern = [hash(tuple(str(row) for row in rocks))]
+            elif (changed := hash(tuple(str(row) for row in rocks))) != pattern[0]:
                 pattern.append(changed)
             else:
                 remaining = remaining % len(pattern) + 1
