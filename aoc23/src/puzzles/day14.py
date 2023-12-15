@@ -44,7 +44,7 @@ def solve_part2(data: str):
     input_data = parse_data(data)
     rocks = [[c for c in row] for row in input_data]
 
-    remaining = 1_000_000_000
+    remaining = 1_000_000_001
     pattern = []
     while (remaining := remaining - 1) > 0:
         before = rocks.copy()
