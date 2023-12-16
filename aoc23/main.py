@@ -24,13 +24,18 @@ def get_puzzle(day):
     return day_module, puzzle
 
 
-def solve_day(day):
+def solve_day(day, part=0):
     day_module, puzzle = get_puzzle(day)
 
     if not puzzle.answered_a:
         answer_a = day_module.solve_part1(puzzle.input_data)
         print(f"  Part 1: {answer_a}")
         puzzle.answer_a = answer_a
+
+    elif part == 1:
+        print(f"Part 1")
+        print(f"  submitted: {puzzle.answer_a}")
+        print(f"  rerunning: {day_module.solve_part1(puzzle.input_data)}")
 
     elif not puzzle.answered_b:
         answer_b = day_module.solve_part2(puzzle.input_data)
@@ -49,13 +54,13 @@ def solve_day(day):
         print(f"  rerunning: {day_module.solve_part2(puzzle.input_data)}")
 
 
-def test_day(day):
+def test_day(day, part=0):
     day_module, puzzle = get_puzzle(day)
 
     for i, example in enumerate(puzzle.examples):
         print(f"Example {i}:")
 
-        if not puzzle.answered_a:
+        if part == 1 or not puzzle.answered_a:
             answer = day_module.solve_part1(example.input_data)
             print(f"  Part 1: {answer}")
             if not example.answer_a:
@@ -64,7 +69,7 @@ def test_day(day):
             else:
                 print(f"  Missing part 1 answer")
 
-        elif not puzzle.answered_b:
+        elif part == 2 or not puzzle.answered_b:
             answer = day_module.solve_part2(example.input_data)
             print(f"  Part 2: {answer}")
             if not example.answer_b:
@@ -80,21 +85,21 @@ def test_day(day):
 
 
 def solve():
-    if len(sys.argv) == 2 and sys.argv[1].isdigit():
-        _day = int(sys.argv[1])
+    if len(sys.argv) > 1 and all(a.isdigit() for a in sys.argv[1:]):
+        args = [int(a) for a in sys.argv[1:]]
     else:
-        _day = datetime.today().day
+        args = [datetime.today().day]
 
-    solve_day(_day)
+    solve_day(*args)
 
 
 def test():
-    if len(sys.argv) == 2 and sys.argv[1].isdigit():
-        _day = int(sys.argv[1])
+    if len(sys.argv) > 1 and all(a.isdigit() for a in sys.argv[1:]):
+        args = [int(a) for a in sys.argv[1:]]
     else:
-        _day = datetime.today().day
+        args = [datetime.today().day]
 
-    test_day(_day)
+    test_day(*args)
 
 
 def generate():
