@@ -1,124 +1,90 @@
-import math
-from itertools import groupby
+from functools import reduce
 
 import networkx as nx
-from matplotlib import pyplot as plt
 
 from ..utils import parse_data
 
 
-def create_graph(input_data):
-    G = nx.DiGraph()
+def create_graph(input_data) -> nx.DiGraph:
+    g = nx.DiGraph()
     for kind, name, destinations in input_data:
-        G.add_node(name, kind="FF" if kind == "%" else "CJ" if kind == "&" else "BC")
-        G.add_edges_from([(name, dest) for dest in destinations.split(", ")])
-    for n, kind in G.nodes.data("kind"):
+        g.add_node(name, kind="FF" if kind == "%" else "CJ" if kind == "&" else "BC")
+        g.add_edges_from([(name, dest) for dest in destinations.split(", ")])
+    return g
+
+
+def reset_graph(graph: nx.DiGraph) -> None:
+    for n, kind in graph.nodes.data("kind"):
         if not kind:
-            G.nodes[n]["kind"] = "OTHER"
+            graph.nodes[n]["kind"] = None
+            graph.nodes[n]["value"] = True
         elif kind == "FF":
-            G.nodes[n]["value"] = False
+            graph.nodes[n]["value"] = False
         elif kind == "CJ":
-            for nb in in_neighbors(G, n):
-                G.nodes[n][nb] = False
-    return G
+            for nb in graph.predecessors(n):
+                graph.nodes[n][nb] = False
 
 
-def out_neighbors(graph, node):
-    return (n for edge in graph.out_edges(node) for n in edge if n != node)
+def graph_sections(graph: nx.DiGraph) -> list[nx.DiGraph]:
+    sections = []
+    for nb in graph["broadcaster"]:
+        visited, queue = {"broadcaster"}, [nb]
+        while queue and (node := queue.pop(0)):
+            if node not in visited:
+                visited.add(node)
+                queue.extend(graph[node])
+
+        sections.append(graph.subgraph(visited).copy())
+    return sections
 
 
-def in_neighbors(graph, node):
-    return (n for edge in graph.in_edges(node) for n in edge if n != node)
-
-
-def push_button(graph, part2=False):
+def push_button(graph: nx.DiGraph) -> tuple[int, int]:
     queue = [("button", False, "broadcaster")]
-    low, high, done = 0, 0, False
+    low, high = 0, 0
     while queue:
         source, signal, dest = queue.pop(0)
         low += 0 if signal else 1
         high += 1 if signal else 0
-        if dest == "rx" and not signal:
-            print(low, high)
-            done = part2
 
         node = graph.nodes[dest]
-        # print(f"{source} -{'high' if signal else 'low'}-> {dest}")
         if node["kind"] == "BC":
-            queue.extend((dest, signal, nb) for nb in out_neighbors(graph, dest))
-        elif node["kind"] == "FF":
-            if not signal:
-                node["value"] = not node["value"]
-                queue.extend(
-                    (dest, node["value"], nb) for nb in out_neighbors(graph, dest)
-                )
+            queue.extend((dest, signal, nb) for nb in graph[dest])
+        elif node["kind"] == "FF" and not signal:
+            node["value"] = not node["value"]
+            queue.extend((dest, node["value"], nb) for nb in graph[dest])
         elif node["kind"] == "CJ":
             node[source] = signal
-            all_high = all(node[nb] for nb in in_neighbors(graph, dest))
-            queue.extend((dest, not all_high, nb) for nb in out_neighbors(graph, dest))
+            all_high = all(node[nb] for nb in graph.predecessors(dest))
+            queue.extend((dest, not all_high, nb) for nb in graph[dest])
+        elif node["kind"] is None and not signal:
+            node["value"] = signal
 
-    return low, high, done
+    return low, high
 
 
 def solve_part1(data: str):
     input_data = parse_data(data, regex=r"([%&]?)([a-z]+) -> ([a-z, ]+)")
-    G = create_graph(input_data)
+    graph = create_graph(input_data)
+    reset_graph(graph)
 
     low, high = 0, 0
     for _ in range(1000):
-        l, h, _ = push_button(G)
+        l, h = push_button(graph)
         low, high = low + l, high + h
 
     return low * high
 
 
-def ranges(i):
-    for a, b in groupby(enumerate(i), lambda pair: pair[1] - pair[0]):
-        b = list(b)
-        yield b[0][1], b[-1][1]
-
-
 def solve_part2(data: str):
     input_data = parse_data(data, regex=r"([%&]?)([a-z]+) -> ([a-z, ]+)")
-    G = create_graph(input_data)
+    graph = create_graph(input_data)
+    reset_graph(graph)
 
-    draw_graph(G)
-    return None
+    answer = []
+    for subgraph in graph_sections(graph):
+        answer.append(0)
+        while subgraph.nodes["rx"]["value"]:
+            push_button(subgraph)
+            answer[-1] += 1
 
-    low, high, done = 0, 0, False
-    while not done:
-        l, h, done = push_button(G, True)
-        low, high = low + l, high + h
-
-    return low + high
-
-
-def draw_graph(G):
-    colors = {
-        "broadcaster": "green",
-        "rx": "red",
-    }
-    colors = [
-        colors.get(n, "yellow" if kind == "FF" else "blue")
-        for n, kind in G.nodes.data("kind")
-    ]
-    G.nodes["broadcaster"]["color"] = 0xFF00FF
-
-    size = 8 + len(G.nodes) // 12
-    plt.figure(figsize=(size, size))
-    nx.draw_networkx(
-        G,
-        node_size=800,
-        node_color=colors,
-        pos=nx.kamada_kawai_layout(G),
-        with_labels=True,
-    )
-    plt.axis("off")
-    plt.show()
-
-
-TEST_DATA = """broadcaster -> a
-%a -> inv, con
-&inv -> b
-%b -> con
-&con -> output"""
+    return reduce(lambda x, y: x * y, answer)
