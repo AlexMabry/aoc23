@@ -16,7 +16,7 @@ PACKAGE = __name__.split(".")[0]
 def get_puzzle(day):
     # Dynamically import the day's module
     module_name = f".src.puzzles.day{day:02d}"
-    day_module = importlib.import_module(module_name, package=PACKAGE)
+    day_module = importlib.import_module(module_name, package="aoc23")
 
     # Fetching data using advent-of-code-data library
     puzzle = Puzzle(year=YEAR, day=int(day))  # Replace 2023 with the actual year
@@ -122,3 +122,12 @@ def generate():
         day_py = puzzle_dir / f"day{day:02}.py"
         day_py.touch()
         day_py.write_text(template.render() + "\n")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and all(a.isdigit() for a in sys.argv[1:]):
+        args = [int(a) for a in sys.argv[1:]]
+    else:
+        args = [datetime.today().day]
+
+    solve_day(*args)
