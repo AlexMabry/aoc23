@@ -31,16 +31,14 @@ def solve_part1(data: str):
         for x, y, m, f in product(range(W), range(H), range(4), range(4))
     )
 
-    paths = {
-        nx.dijkstra_path_length(G, s, t)
-        for s, t in product(
-            {(0, 0, 3, 1), (0, 0, 3, 2)},
-            {(W - 1, H - 1, m, f) for m in range(4) for f in range(4)},
-        )
-        if nx.has_path(G, s, t)
-    }
+    sources = {(0, 0, 3, 1), (0, 0, 3, 2)}
+    targets = {(W - 1, H - 1, m, f) for m in range(4) for f in range(4)}
 
-    return min(paths)
+    return min(
+        nx.dijkstra_path_length(G, s, t)
+        for s, t in product(sources, targets)
+        if nx.has_path(G, s, t)
+    )
 
 
 def solve_part2(data: str):
